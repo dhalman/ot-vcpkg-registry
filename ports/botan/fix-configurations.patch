@@ -1,0 +1,52 @@
+--- a/src/build-data/botan-config.cmake.in
++++ b/src/build-data/botan-config.cmake.in
+@@ -131,10 +131,17 @@
+   add_library(botan::botan-static STATIC IMPORTED)
+   set_target_properties(botan::botan-static
+     PROPERTIES
++      IMPORTED_CONFIGURATIONS           RELEASE
++      IMPORTED_LOCATION_RELEASE         "${_Botan_LIB_PREFIX}/%{static_lib_name}"
+       IMPORTED_LOCATION                 "${_Botan_LIB_PREFIX}/%{static_lib_name}"
+       INTERFACE_INCLUDE_DIRECTORIES     "${_Botan_INCLUDE_DIR}"
+       IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
+       INTERFACE_LINK_OPTIONS            "SHELL:%{cxx_abi_flags}")
++  if(EXISTS "${_Botan_PREFIX}/debug/%{libdir_rel}/%{static_lib_name}")
++    set_property(TARGET botan::botan-static APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
++    set_target_properties(botan::botan-static PROPERTIES
++      IMPORTED_LOCATION_DEBUG "${_Botan_PREFIX}/debug/%{libdir_rel}/%{static_lib_name}")
++  endif()
+   if(APPLE)
+     find_library(_Botan_CoreFoundation_FRAMEWORK CoreFoundation REQUIRED)
+     find_library(_Botan_Security_FRAMEWORK Security REQUIRED)
+@@ -180,12 +187,27 @@
+       INTERFACE_LINK_LIBRARIES
+         "${_Botan_CoreFoundation_FRAMEWORK};${_Botan_Security_FRAMEWORK}")
+   endif()
+-  set_property(TARGET botan::botan APPEND PROPERTY IMPORTED_CONFIGURATIONS NOCONFIG)
++  set_property(TARGET botan::botan APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+   set_target_properties(botan::botan
+     PROPERTIES
+-      IMPORTED_LOCATION_NOCONFIG "${_Botan_LIB_PREFIX}/%{shared_lib_name}"
+-      IMPORTED_SONAME_NOCONFIG   "%{shared_lib_name}"
+-      IMPORTED_IMPLIB_NOCONFIG   "${_Botan_implib}")
++      IMPORTED_LOCATION_RELEASE "${_Botan_shared_lib}"
++      IMPORTED_SONAME_RELEASE   "%{shared_lib_name}"
++      IMPORTED_IMPLIB_RELEASE   "${_Botan_implib}")
++  file(RELATIVE_PATH _Botan_shared_rel "${_Botan_PREFIX}/" "${_Botan_shared_lib}")
++  set(_Botan_debug_shared_lib "${_Botan_PREFIX}/debug/${_Botan_shared_rel}")
++  set(_Botan_debug_implib "")
++  if(_Botan_implib)
++    file(RELATIVE_PATH _Botan_implib_rel "${_Botan_PREFIX}/" "${_Botan_implib}")
++    set(_Botan_debug_implib "${_Botan_PREFIX}/debug/${_Botan_implib_rel}")
++  endif()
++  if(NOT _Botan_shared_rel MATCHES "^\\.\\./" AND EXISTS "${_Botan_debug_shared_lib}" AND
++     (NOT _Botan_debug_implib OR EXISTS "${_Botan_debug_implib}"))
++    set_property(TARGET botan::botan APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
++    set_target_properties(botan::botan PROPERTIES
++      IMPORTED_LOCATION_DEBUG "${_Botan_debug_shared_lib}"
++      IMPORTED_SONAME_DEBUG   "%{shared_lib_name}"
++      IMPORTED_IMPLIB_DEBUG   "${_Botan_debug_implib}")
++  endif()
+ 
+   # TODO(Botan4): Remove this alias
+   if(NOT ${CMAKE_VERSION} VERSION_LESS "3.18.0") # 3.18 allows creating ALIAS targets to non-GLOBAL targets

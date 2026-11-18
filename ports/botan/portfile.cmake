@@ -9,6 +9,7 @@ vcpkg_from_github(
         configure-zlib.patch
         fix_android.patch
         macos-frameworks.patch
+        fix-configurations.patch
 )
 file(COPY "${CMAKE_CURRENT_LIST_DIR}/configure" DESTINATION "${SOURCE_PATH}")
 
