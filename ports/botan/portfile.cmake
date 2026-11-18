@@ -89,12 +89,10 @@ if(VCPKG_TARGET_IS_WINDOWS AND NOT VCPKG_TARGET_IS_MINGW)
         vcpkg_list(APPEND configure_arguments "--cc=msvc")
     endif()
 
-    vcpkg_list(APPEND configure_arguments "--extra-cxxflags=${VCPKG_DETECTED_CMAKE_CXX_FLAGS}")
-
     if(VCPKG_LIBRARY_LINKAGE STREQUAL "dynamic")
-        vcpkg_list(APPEND configure_arguments --enable-shared-library --disable-static-library)
+        set(botan_libraries --enable-shared-library --disable-static-library)
     else()
-        vcpkg_list(APPEND configure_arguments --disable-shared-library --enable-static-library)
+        set(botan_libraries --disable-shared-library --enable-static-library)
     endif()
 
     if(VCPKG_CRT_LINKAGE STREQUAL "dynamic")
@@ -110,12 +108,16 @@ if(VCPKG_TARGET_IS_WINDOWS AND NOT VCPKG_TARGET_IS_MINGW)
         PRERUN_SHELL_RELEASE
             "${PYTHON3}" "${SOURCE_PATH}/configure.py"
             ${configure_arguments}
+            "--extra-cxxflags=${VCPKG_DETECTED_CMAKE_CXX_FLAGS}"
+            ${botan_libraries}
             "--prefix=${CURRENT_PACKAGES_DIR}"
             "--msvc-runtime=${BOTAN_MSVC_RUNTIME}"
             "--with-external-libdir=${CURRENT_INSTALLED_DIR}/lib"
         PRERUN_SHELL_DEBUG
             "${PYTHON3}" "${SOURCE_PATH}/configure.py"
             ${configure_arguments}
+            "--extra-cxxflags=${VCPKG_COMBINED_CXX_FLAGS_DEBUG}"
+            ${botan_libraries}
             "--prefix=${CURRENT_PACKAGES_DIR}/debug"
             "--msvc-runtime=${BOTAN_MSVC_RUNTIME}d"
             "--with-external-libdir=${CURRENT_INSTALLED_DIR}/debug/lib"
