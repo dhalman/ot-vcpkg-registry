@@ -1,0 +1,13 @@
+{
+  "name": "vcpkg-ci-botan-312",
+  "version-string": "ci",
+  "description": "Validate the imported artifacts of the Botan 3.12 package",
+  "license": "MIT",
+  "dependencies": [
+    "botan",
+    {
+      "name": "vcpkg-cmake",
+      "host": true
+    }
+  ]
+}
