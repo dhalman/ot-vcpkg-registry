@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.25)
+foreach(kind IN ITEMS RUNTIME LINKER)
+    cmake_path(GET ${kind} PARENT_PATH actual)
+    cmake_path(COMPARE "${actual}" EQUAL "${EXPECT_${kind}}" matches)
+    if(NOT matches OR NOT EXISTS "${${kind}}")
+        message(FATAL_ERROR "${kind}: expected an artifact in ${EXPECT_${kind}}, got ${${kind}}")
+    endif()
+endforeach()
